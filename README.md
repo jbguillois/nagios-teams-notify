@@ -1,15 +1,16 @@
+
 # nagios-teams-notify
-Send Nagios alerts to a Microsoft Teams channel
+Send Nagios/Shinken alerts to a Microsoft O365 Teams channel
 
 ## Overview
 
-This script can send Nagios alerts to a Microsoft Teams channel.
+This script can send Nagios/Shinken alerts to a Microsoft O365 Teams channel.
 
 By sending alerts to Teams, we can simplify addition and removal alert recipients, allow for self-service subscription and push preferences, and have conversations based around the alerts as they occur.
 
 ## Installation
 
-Install dependancies from requirements.txt and place `notify-teams.py` where it can be executed by the Nagios user. Make the script executable with `chmod +x notify-teams.py`.
+You can should install python dependencies listed in `requirements.txt` (you might use `pip` to do so) and copy `notify-teams.py` where it can be executed by the Nagios/Shinken user (`/usr/lib` could be a good option). Make sure the script is  executable with `chmod +x notify-teams.py`.
 
 ## Configuration
 
@@ -23,14 +24,14 @@ From [Using Office 365 Connectors: Teams](https://docs.microsoft.com/en-us/micro
 4. Copy the webhook to the clipboard and save it. You'll need the webhook URL for sending information to Microsoft Teams.
 5. Choose Done.
 
-### Configure Nagios
+### Configure Nagios/Shinken
 
-Create a command object in the Nagios configuration.
+Create a command object in the Nagios/Shinken configuration.
 
 ```
 define command {
     command_name notify_teams
-    command_line /usr/bin/printf "$LONGSERVICEOUTPUT$" | /path/to/script/notify-teams.py  "$NOTIFICATIONTYPE$: $HOSTALIAS$/$SERVICEDESC$ is $SERVICESTATE$" "$SERVICEOUTPUT$" $_CONTACTWEBHOOKURL$
+    command_line /path/to/script/notify-teams.py $_CONTACTWEBHOOKURL$ $NOTIFICATIONTYPE$ $HOSTALIAS$ $HOSTSTATE$ $HOSTDURATION$ $SERVICEDESC$ $SERVICESTATE$ $SERVICEDURATION$ "$LONGSERVICEOUTPUT$" "$SERVICEOUTPUT$"
 }
 ```
 Create a contact object with the custom variable macro _WEBHOOK set to the URL from the Teams channel connector. This variable is used when running the command above.
@@ -41,12 +42,12 @@ define contact {
     alias           Example Team
     host_notifications_enabled  1
     service_notifications_enabled   1
-    host_notification_period	24x7
-    service_notification_period	24x7 
-    host_notification_options	d,u,r,f,s
-    service_notification_options	w,u,c,r,f
-    host_notification_commands	notify_teams
-    service_notification_commands	notify_teams
+    host_notification_period    24x7
+    service_notification_period 24x7 
+    host_notification_options   d,u,r,f,s
+    service_notification_options    w,u,c,r,f
+    host_notification_commands  notify_teams
+    service_notification_commands   notify_teams
     _WEBHOOKURL https://outlook.office.com/webhook/2bfd8a0a-1d45-4ea6-a736-db25a6be5c95@44467e6f-462c-4ea2-823f-7800de5434e3/IncomingWebhook/2863b6ee982c4c51af6e96852289c0c6/ba913a1a-4779-41ca-96af-93ed0869be1b
 }
 ```
