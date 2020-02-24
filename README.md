@@ -1,6 +1,6 @@
 
 # nagios-teams-notify
-Send Nagios/Shinken alerts to a Microsoft O365 Teams channel
+Send Nagios/Shinken alerts to a Microsoft O365 Teams channel.
 
 ## Overview
 
@@ -10,7 +10,7 @@ By sending alerts to Teams, we can simplify addition and removal alert recipient
 
 ## Installation
 
-You can should install python dependencies listed in `requirements.txt` (you might use `pip` to do so) and copy `notify-teams.py` where it can be executed by the Nagios/Shinken user (`/usr/lib` could be a good option). Make sure the script is  executable with `chmod +x notify-teams.py`.
+You can should install python dependencies listed in `requirements.txt` (you might use `pip` to do so) and copy `notifyTeams.py` where it can be executed by the Nagios/Shinken user (`/usr/lib` could be a good option). Make sure the script is  executable with `chmod +x notifyTeams.py`.
 
 ## Configuration
 
@@ -31,7 +31,7 @@ Create a command object in the Nagios/Shinken configuration.
 ```
 define command {
     command_name notify_teams
-    command_line /path/to/script/notify-teams.py $_CONTACTWEBHOOKURL$ $NOTIFICATIONTYPE$ $HOSTALIAS$ $HOSTSTATE$ $HOSTDURATION$ $SERVICEDESC$ $SERVICESTATE$ $SERVICEDURATION$ "$LONGSERVICEOUTPUT$" "$SERVICEOUTPUT$"
+    command_line /path/to/script/notifyTeams.py $_CONTACTWEBHOOKURL$ $NOTIFICATIONTYPE$ $HOSTALIAS$ $HOSTSTATE$ $HOSTDURATION$ $SERVICEDESC$ $SERVICESTATE$ $SERVICEDURATION$ "$LONGSERVICEOUTPUT$" "$SERVICEOUTPUT$"
 }
 ```
 Create a contact object with the custom variable macro _WEBHOOK set to the URL from the Teams channel connector. This variable is used when running the command above.
