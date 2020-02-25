@@ -11,6 +11,7 @@ By sending alerts to Teams, we can simplify addition and removal alert recipient
 ## Installation
 
 You can should install python dependencies listed in `requirements.txt` (you might use `pip` to do so) and copy `notifyTeams.py` where it can be executed by the Nagios/Shinken user (`/usr/lib` could be a good option). Make sure the script is  executable with `chmod +x notifyTeams.py`.
+You can test this script by running the included unit tests (`python -m unittest -v testNotifyTeams.py`) 
 
 ## Configuration
 
@@ -26,12 +27,12 @@ From [Using Office 365 Connectors: Teams](https://docs.microsoft.com/en-us/micro
 
 ### Configure Nagios/Shinken
 
-Create a command object in the Nagios/Shinken configuration.
+Create a command object in the Nagios/Shinken configuration and replace <yourshinkenurl> with your Shinken URL (http://shinkenhost/).
 
 ```
 define command {
     command_name notify_teams
-    command_line /path/to/script/notifyTeams.py $_CONTACTWEBHOOKURL$ $NOTIFICATIONTYPE$ $HOSTALIAS$ $HOSTSTATE$ $HOSTDURATION$ $SERVICEDESC$ $SERVICESTATE$ $SERVICEDURATION$ "$LONGSERVICEOUTPUT$" "$SERVICEOUTPUT$"
+    command_line /path/to/script/notifyTeams.py $_CONTACTWEBHOOKURL$ <youshinkenurl> $NOTIFICATIONTYPE$ $HOSTALIAS$ $HOSTSTATE$ $HOSTDURATION$ $SERVICEDESC$ $SERVICESTATE$ $SERVICEDURATION$ --msg "$SERVICEOUTPUT$ - $LONGSERVICEOUTPUT$"
 }
 ```
 Create a contact object with the custom variable macro _WEBHOOK set to the URL from the Teams channel connector. This variable is used when running the command above.
@@ -48,7 +49,7 @@ define contact {
     service_notification_options    w,u,c,r,f
     host_notification_commands  notify_teams
     service_notification_commands   notify_teams
-    _WEBHOOKURL https://outlook.office.com/webhook/2bfd8a0a-1d45-4ea6-a736-db25a6be5c95@44467e6f-462c-4ea2-823f-7800de5434e3/IncomingWebhook/2863b6ee982c4c51af6e96852289c0c6/ba913a1a-4779-41ca-96af-93ed0869be1b
+    _WEBHOOKURL <yourwebhookURL>
 }
 ```
 

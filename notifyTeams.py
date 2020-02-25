@@ -12,7 +12,7 @@ import json
 import requests
 import sys
 
-def create_message(url, notificationType, hostAlias, hostState, hostDuration, serviceDesc, serviceState, serviceDuration, longMessage):
+def create_message(shinkenURI, notificationType, hostAlias, hostState, hostDuration, serviceDesc, serviceState, serviceDuration, longMessage):
     message = {}
     message['@type'] = 'MessageCard'
     message['@context'] = 'https://schema.org/extensions'
@@ -21,13 +21,9 @@ def create_message(url, notificationType, hostAlias, hostState, hostDuration, se
     if notificationType == 'PROBLEM' :
         message['themeColor'] = 'FF0000'
         
-        if hostState == 'DOWN':
+        if hostState == 'DOWN' or hostState == 'UNREACHABLE':
             message['title'] =  'Problem detected with ' + hostAlias
-            message['text'] =  '/!\\ Host (' + hostAlias + ') is down since '+ hostDuration +'!'
-
-        elif hostState == 'UNREACHABLE': 
-            message['title'] =  'Problem detected with ' + hostAlias
-            message['text'] =  '/!\\ Host (' + hostAlias + ') is unreachable since '+ hostDuration +'!'
+            message['text'] =  '/!\\ Host (' + hostAlias + ') is '+hostState.lower()+' since '+ hostDuration +'!'
 
         elif serviceState == 'CRITICAL' or serviceState == 'UNKNOWN' or serviceState == 'WARNING':
             message['title'] =  '/!\\ Service (' + hostAlias + '/' + serviceDesc + ') is '+ serviceState.lower() + ' since ' + serviceDuration + '!'
@@ -36,10 +32,14 @@ def create_message(url, notificationType, hostAlias, hostState, hostDuration, se
     ''' Handle recoveries '''
     if notificationType == 'RECOVERY' :
         message['themeColor'] = '00FF00'
-        message['summary'] =  'Problem is now solved with ' + hostAlias + '/' + serviceDesc
         
         if hostState == 'UP' and serviceState == 'OK': 
+            message['summary'] =  'Problem is now solved with ' + hostAlias + '/' + serviceDesc
             message['text'] =  'Host/Service (' + hostAlias + '/' + serviceDesc +') are now OK'
+
+        elif hostState == 'UP' and serviceState != 'OK': 
+            message['summary'] =  'Problem is now solved with host ' + hostAlias
+            message['text'] =  'Host (' + hostAlias + ') is now UP'
 
 
     ''' Add Action Card '''
@@ -50,7 +50,7 @@ def create_message(url, notificationType, hostAlias, hostState, hostDuration, se
     
     target = {}
     target['os'] = 'default'
-    target['uri'] = 'http://monitoring.omega-cap.local/'+hostAlias
+    target['uri'] = shinkenURI+hostAlias
     
     targets = []
     targets.append(target)
@@ -64,8 +64,9 @@ def create_message(url, notificationType, hostAlias, hostState, hostDuration, se
 def send_to_teams(url, message_json):
     """ posts the message to the O365 Teams webhook url """
     headers = {'Content-Type': 'application/json'}
+    print ('Sending to '+url)
     r = requests.post(url, data=message_json, headers=headers)
-    if r.status_code == requests.codes.ok:
+    if r.status_code == 200:
         print('success')
         return True
     else:
@@ -76,12 +77,17 @@ def send_to_teams(url, message_json):
 
 def main(args):
 
-    # verify url
+    # verify Teams url
     url = args.get('url')
-    if url is None:
+    if url is None or not (url.startswith( 'http://' ) or url.startswith( 'https://' )):
         # error no url
-        print('error no url')
-        exit(2)
+        sys.exit('Invalid or missing Teams URL')
+
+    # verify Shinken url
+    shinkenURI = args.get('shinkenUri')
+    if shinkenURI is None or not (shinkenURI.startswith( 'http://' ) or shinkenURI.startswith( 'https://' )):
+        # error no url
+        sys.exit('Invalid or missing Shinken URL')
 
     notificationType = args.get('notificationType')
     hostAlias = args.get('hostAlias')
@@ -92,10 +98,12 @@ def main(args):
     serviceDuration = args.get('serviceDuration')
     longMessage = args.get('msg')
     
-    message_dict = create_message(url, notificationType, hostAlias, hostState, hostDuration, serviceDesc, serviceState, serviceDuration, longMessage)
+    message_dict = create_message(shinkenURI, notificationType, hostAlias, hostState, hostDuration, serviceDesc, serviceState, serviceDuration, longMessage)
     message_json = json.dumps(message_dict)
     
     send_to_teams(url, message_json)
+    
+    exit(0)
 
 if __name__=='__main__':
     args = {}
@@ -104,6 +112,7 @@ if __name__=='__main__':
 
     # Positional arguments
     parser.add_argument('url', action='store', help='O365 Teams connector Webhook URL')
+    parser.add_argument('shinkenUri', action='store', help='Nagios/Shinken URL')
     parser.add_argument('notificationType', action='store', help='Notification type')
     parser.add_argument('hostAlias', action='store', help='Host alias')
     parser.add_argument('hostState', action='store', help='Host state')
@@ -118,6 +127,7 @@ if __name__=='__main__':
     parsedArgs = parser.parse_args()
 
     args['url'] = parsedArgs.url
+    args['shinkenUri'] = parsedArgs.shinkenUri
     args['notificationType'] = parsedArgs.notificationType
     args['hostAlias'] = parsedArgs.hostAlias
     args['hostState'] = parsedArgs.hostState
@@ -130,8 +140,4 @@ if __name__=='__main__':
     if parsedArgs.msg:
         args['msg'] = parsedArgs.msg
 
-    #if not sys.__stdin__.isatty():
-    #    args['long_message'] = sys.__stdin__.read()
-    #    pass
-    
     main(args)
