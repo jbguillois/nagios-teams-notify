@@ -1,5 +1,5 @@
 python:
-  - "2.7"
+  - "3.8.1"
 
 # Install requirements
 install:
