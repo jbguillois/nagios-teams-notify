@@ -50,7 +50,7 @@ def create_message(shinkenURI, notificationType, hostAlias, hostState, hostDurat
     
     target = {}
     target['os'] = 'default'
-    target['uri'] = shinkenURI+hostAlias
+    target['uri'] = shinkenURI+'host/'+hostAlias
     
     targets = []
     targets.append(target)
