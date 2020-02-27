@@ -30,7 +30,7 @@ class TestNotifyTeamsCLI(unittest.TestCase):
         args = []
         args.append(sys.executable)
         args.append('notifyTeams.py')
-        args.append('https://outlook.office.com/webhook/0cd3077d-7ab0-487b-bd2f-07940b6bcf70@76a2ae5a-9f00-4f6b-95ed-5d33d77c4d61/IncomingWebhook/5600e27d72d943a99697b9c05011d4d1/8ada9818-1380-4eed-a23d-26c1a7ed6ecf')
+        args.append('https://outlook.office.com/webhook/')
         args.append('http://localhost/')
         args.append('PROBLEM')
         args.append('host')
