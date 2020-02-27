@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/jbguillois/nagios-teams-notify.svg?branch=master)](https://travis-ci.org/jbguillois/nagios-teams-notify)
 
 # nagios-teams-notify
 Send Nagios/Shinken alerts to a Microsoft O365 Teams channel.
