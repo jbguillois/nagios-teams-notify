@@ -33,7 +33,7 @@ Create a command object in the Nagios/Shinken configuration and replace <yourshi
 ```
 define command {
     command_name notify_teams
-    command_line /path/to/script/notifyTeams.py $_CONTACTWEBHOOKURL$ <youshinkenurl> $NOTIFICATIONTYPE$ $HOSTALIAS$ $HOSTSTATE$ $HOSTDURATION$ $SERVICEDESC$ $SERVICESTATE$ $SERVICEDURATION$ --msg "$SERVICEOUTPUT$ - $LONGSERVICEOUTPUT$"
+    command_line /path/to/script/notifyTeams.py $_CONTACTWEBHOOKURL$ <youshinkenurl> $NOTIFICATIONTYPE$ $HOSTALIAS$ $HOSTSTATE$ "$HOSTDURATION$" "$SERVICEDESC$" "$SERVICESTATE$" "$SERVICEDURATION$" --msg "$SERVICEOUTPUT$ - $LONGSERVICEOUTPUT$"
 }
 ```
 Create a contact object with the custom variable macro _WEBHOOK set to the URL from the Teams channel connector. This variable is used when running the command above.
